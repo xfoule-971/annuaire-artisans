@@ -8,7 +8,6 @@ const pool = mysql.createPool({
   port: process.env.DB_PORT
 });
 
-// Test de connexion à la DB
 (async () => {
   try {
     const connection = await pool.getConnection();
@@ -16,8 +15,9 @@ const pool = mysql.createPool({
     connection.release();
   } catch (err) {
     console.error("Erreur de connexion à la base :", err.message);
-    process.exit(1); // arrête le serveur si pas de connexion
+    process.exit(1);
   }
 })();
 
 module.exports = pool;
+

@@ -4,14 +4,12 @@ const pool = require('../db/db');
 
 const router = express.Router();
 
-// Transporteur Nodemailer
+// Transporteur Nodemailer (Gmail)
 const transporter = nodemailer.createTransport({
-  host: process.env.MAIL_HOST,
-  port: process.env.MAIL_PORT,
-  secure: false,
+  service: 'gmail',
   auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
 });
 
@@ -20,7 +18,6 @@ router.post('/', async (req, res) => {
   try {
     const { artisanId, nom, email, message } = req.body;
 
-    // Validation formulaire
     if (!artisanId || !nom || !email || !message) {
       return res.status(400).json({
         success: false,
@@ -28,7 +25,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Récupération email artisan
+    // Récupération de l’artisan
     const [rows] = await pool.query(
       'SELECT nom, email FROM artisans WHERE id = ?',
       [artisanId]
@@ -43,14 +40,14 @@ router.post('/', async (req, res) => {
 
     const artisan = rows[0];
 
-    // Email format formulaire de contact
-    const mailOptions = {
-      from: `"Formulaire de contact" <${process.env.MAIL_USER}>`,
+    // Email type formulaire de contact
+    await transporter.sendMail({
+      from: `"Formulaire de contact" <${process.env.EMAIL_USER}>`,
       to: artisan.email,
       replyTo: email,
       subject: 'Nouveau message via le formulaire de contact',
       text: `
-Vous avez reçu un nouveau message depuis le formulaire de contact.
+Vous avez reçu un nouveau message via le formulaire de contact.
 
 Nom : ${nom}
 Email : ${email}
@@ -61,9 +58,7 @@ ${message}
 ---
 Répondez directement à cet email pour contacter le visiteur.
       `
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
 
     res.status(200).json({
       success: true,
@@ -80,4 +75,5 @@ Répondez directement à cet email pour contacter le visiteur.
 });
 
 module.exports = router;
+
 

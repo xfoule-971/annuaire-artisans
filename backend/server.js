@@ -1,20 +1,31 @@
+require('dotenv').config();
 const express = require('express');
+const cors = require('cors'); // recommandé si frontend séparé
 const app = express();
 
+// middleware
+app.use(cors());
 app.use(express.json());
 
 // routes API
 app.use('/api', require('./routes'));
 
-// page d’accueil (si tu en as une)
+// page d’accueil
 app.get('/', (req, res) => {
   res.json({ message: 'Bienvenue sur l’API Annuaire Artisans' });
 });
 
-// page 404
-app.use(require('./routes/notFound'));
+// page 404 → TOUJOURS à la fin
+app.use((req, res) => {
+  res.status(404).json({
+    error: '404',
+    message: 'Page non trouvée'
+  });
+});
 
+// lancement serveur
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Serveur lancé sur le port ${PORT}`);
 });
+
