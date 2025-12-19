@@ -1,0 +1,14 @@
+/* Définir la font-face */
+@font-face {
+  font-family: 'Graphik';
+  src: url('../assets/fonts/Graphik-Regular.woff'),
+  url('../assets/fonts/Graphik-Regular.ttf') format('truetype'),
+  url('../assets/fonts/Graphik-Regular.otf') format('opentype');
+}
+
+/* Appliquer globalement */
+*{
+  margin: 0;
+  padding: 0;
+  font-family: "Graphik", sans-serif;
+}
