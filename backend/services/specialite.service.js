@@ -4,18 +4,21 @@ const pool = require('../db/db'); // fichier db.js qui exporte le pool mysql2/pr
 const getAllSpecialites = async () => {
     try {
         const [rows] = await pool.query('SELECT DISTINCT specialite FROM artisans');
-        return rows; // renvoie un tableau d'objets { specialite: "..." }
+        return rows.map(r => r.specialite); // tableau de strings ['plomberie','menuiserie',...]
     } catch (err) {
         throw new Error('Erreur lors de la récupération des spécialités : ' + err.message);
     }
 };
 
-// Récupérer une spécialité spécifique
+// Récupérer tous les artisans d'une spécialité spécifique (insensible à la casse et sans espace)
 const getSpecialiteByName = async (nom) => {
     try {
-        const [rows] = await pool.query('SELECT DISTINCT specialite FROM artisans WHERE specialite = ?', [nom]);
-        if (rows.length === 0) throw new Error('Spécialité non trouvée');
-        return rows[0]; // renvoie un objet { specialite: "..." }
+        const [rows] = await pool.query(
+            'SELECT * FROM artisans WHERE LOWER(TRIM(specialite)) = LOWER(TRIM(?))',
+            [nom]
+        );
+        if (rows.length === 0) throw new Error('Aucun artisan trouvé pour cette spécialité');
+        return rows; // renvoie un tableau d'objets { id, nom, ville, specialite, ... }
     } catch (err) {
         throw new Error('Erreur lors de la récupération de la spécialité : ' + err.message);
     }
@@ -25,3 +28,5 @@ module.exports = {
     getAllSpecialites,
     getSpecialiteByName
 };
+
+

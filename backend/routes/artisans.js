@@ -1,29 +1,35 @@
 const express = require('express');
 const router = express.Router();
-
-const {
-  getAllArtisans,
-  getArtisanByNom
-} = require('../services/artisan.service');
+const pool = require('../db/db');
 
 // GET /api/artisans
+// Si query `search` est présent, filtre par nom exact ou partiel
 router.get('/', async (req, res) => {
+  const { search } = req.query;
   try {
-    const artisans = await getAllArtisans();
-    res.json(artisans);
+    let rows;
+    if (search) {
+      const term = `%${search}%`;
+      [rows] = await pool.query('SELECT * FROM artisans WHERE nom LIKE ?', [term]);
+    } else {
+      [rows] = await pool.query('SELECT * FROM artisans');
+    }
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET /api/artisans/:nom
-router.get('/:nom', async (req, res) => {
+// GET /api/artisans/:id
+router.get('/:id', async (req, res) => {
   try {
-    const artisan = await getArtisanByNom(req.params.nom);
-    res.json(artisan);
+    const [rows] = await pool.query('SELECT * FROM artisans WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Artisan non trouvé' });
+    res.json(rows[0]);
   } catch (err) {
-    res.status(404).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
 module.exports = router;
+
