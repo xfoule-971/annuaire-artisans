@@ -1,11 +1,16 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors'); // recommandé si frontend séparé
+const cors = require('cors');
+const path = require('path');
+
 const app = express();
 
 // middleware
 app.use(cors());
 app.use(express.json());
+
+// rendre le dossier uploads public
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // routes API
 app.use('/api', require('./routes'));
@@ -28,4 +33,5 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Serveur lancé sur le port ${PORT}`);
 });
+
 

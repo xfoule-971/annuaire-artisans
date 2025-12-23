@@ -10,10 +10,13 @@ const getAllArtisans = async () => {
     }
 };
 
-// Récupérer un artisan par nom
+// Récupérer un artisan par nom (insensible à la casse et sans espace)
 const getArtisanByNom = async (nom) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM artisans WHERE nom = ?', [nom]);
+        const [rows] = await pool.query(
+            'SELECT * FROM artisans WHERE LOWER(TRIM(nom)) = LOWER(TRIM(?))',
+            [nom]
+        );
         if (rows.length === 0) throw new Error('Artisan non trouvé');
         return rows[0];
     } catch (err) {
@@ -25,3 +28,4 @@ module.exports = {
     getAllArtisans,
     getArtisanByNom
 };
+
